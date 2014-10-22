@@ -20,6 +20,26 @@ def page_not_found(e):
 def index():
     return render_template('index.html')
 
+@app.route("/current/")
+def current():
+    #TODO: pull class details for selected class
+    return render_template('current.html')
+
+@app.route("/upcoming/")
+def upcoming():
+    #TODO: pull upcoming classes from database
+    return render_template('upcoming.html')
+
+@app.route("/historic/")
+def historic():
+    #TODO: pull historic classes from database
+    return render_template('historic.html')
+
+@app.route("/instructors/")
+def instructors():
+    #TODO: pull upcoming classes from database
+    return render_template('instructors.html')
+
 # launch
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

@@ -1,9 +1,9 @@
 {% extends "base.html" %}
+{% set active_page = "home" %}
 {% block title %} - Home{% endblock %}
 {% block content %}
-{% if not session.logged_in %}
-     <p>You are not logged in.</p>
-{% else %}
-     <p>You are logged in.</p>
-{% endif %}
+
+     <p>Welcome to The Pump!</p>
+     <p>Click on one of the options on the top to do something useful!</p>
+
 {% endblock %}
