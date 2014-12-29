@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% set active_page = "showclass" %}
+{% block title %} - View Class{% endblock %}
+{% block content %}
+
+<form action="/editclass/" method="post">
+
+<div class="row">
+    <div class="col-md-8">
+
+          <!-- Table -->
+          <table class="table">
+            <tr><th>Name</th><th>Street Address</th><th>City, State</th></tr>
+            <tr><td><input type="text" class="form-control" name="name" placeholder="Name" value="John Smith" required></td><td><input type="text" class="form-control" name="address 1" placeholder="Street Address" value="123 Some Street" required></td><td><input type="text" class="form-control" name="address 1" placeholder="City, State" value="Crofton, MD" required></td></tr>
+            <tr><td>Jane Smith</td><td>123 Some Street</td><td> Crofton MD</td></tr>
+            <tr><td>Peter Smith</td><td>123 Some Street</td><td> Crofton MD</td></tr>
+            <tr><td>Jose Smith</td><td>123 Some Street</td><td> Crofton MD</td></tr>
+            <tr><td>Jessie Smith</td><td>123 Some Street</td><td> Crofton MD</td></tr>
+          </table>
+        </div>
+
+    </div> <!--col-md-8 -->
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Course info</div>
+            <div class="panel-body">
+              <p>Instructor J. Doe</p>
+              <p>Heartsaver CPR</p>
+              <p>Course Date: 10/13/2014</p>
+              <p>Infant: X </p>
+              <p>Child: X </p>
+              <p>Written test: X</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</form>
+
+
+
+{% endblock %}

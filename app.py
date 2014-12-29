@@ -1,11 +1,9 @@
 import os
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, request, render_template, send_from_directory
 
 # initialization
 app = Flask(__name__)
-app.config.update(
-    DEBUG = True,
-)
+
 
 # controllers
 @app.route('/favicon.ico')
@@ -20,15 +18,40 @@ def page_not_found(e):
 def index():
     return render_template('index.html')
 
-@app.route("/current/")
-def current():
+@app.route("/class/<int:class_id>/", methods=['GET'])
+def show_class(class_id):
     #TODO: pull class details for selected class
-    return render_template('current.html')
+    edit = request.args.get('edit', 'false')
 
-@app.route("/upcoming/")
+    if edit == 'true':
+        #todo: send class data
+        return render_template('editclass.html')
+
+    return render_template('showclass.html')
+
+@app.route("/class/<int:class_id>/", methods=['POST'])
+def update_class(class_id):
+    #TODO: update class details, then show class
+
+    edit = request.args.get('edit', 'false')
+
+    if edit == 'true':
+        #todo: send class data
+        return render_template('editclass.html')
+
+    return render_template('showclass.html')
+
+@app.route("/class/")
 def upcoming():
     #TODO: pull upcoming classes from database
-    return render_template('upcoming.html')
+    edit = request.args.get('edit', 'false')
+
+    if edit == 'true':
+        #todo: create empty class, send class data
+        return render_template('editclass.html')
+
+
+    return render_template('class.html')
 
 @app.route("/historic/")
 def historic():
