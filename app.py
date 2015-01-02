@@ -117,6 +117,20 @@ def update_class(class_id):
 
     return render_template('showclass.html', class_data="nop")
 
+@app.route("/class/new/")
+def new_class():
+    #fake data for now
+    class_data={}
+
+    class_data['students'] = {}
+    class_data['options'] = {'Child':'false',"Infants":'false','Written':'false'}
+    class_data['class_date'] = ""
+    class_data['class_id'] = 0
+    class_data['curr_instructor'] = 0
+    class_data['curr_course_type'] = 0
+    return render_edit_class(class_data, '')
+
+
 def render_edit_class(class_data, request_data):
     #TODO: pull real data
     instructors = [[12345, "J. Richmond"],[567789, "C. Richmond"],[145643, "J. Tobin"]]
