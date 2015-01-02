@@ -56,3 +56,6 @@ target/
 # OSX stuff
 *~
 .DS_Store
+
+#foreman env
+.env

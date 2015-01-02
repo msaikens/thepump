@@ -1,43 +1,65 @@
 {% extends "base.html" %}
 {% set active_page = "showclass" %}
-{% block title %} - View Class{% endblock %}
+{% block title %} - Edit Class{% endblock %}
 {% block content %}
 
-<form action="/editclass/" method="post">
+<form action="/class/{{class_data['class_id']}}/?edit=true" method="post">
 
 <div class="row">
-    <div class="col-md-8">
-
+    <div class="col-md-8 form-group">
           <!-- Table -->
           <table class="table">
             <tr><th>Name</th><th>Street Address</th><th>City, State</th></tr>
-            <tr><td><input type="text" class="form-control" name="name" placeholder="Name" value="John Smith" required></td><td><input type="text" class="form-control" name="address 1" placeholder="Street Address" value="123 Some Street" required></td><td><input type="text" class="form-control" name="address 1" placeholder="City, State" value="Crofton, MD" required></td></tr>
-            <tr><td>Jane Smith</td><td>123 Some Street</td><td> Crofton MD</td></tr>
-            <tr><td>Peter Smith</td><td>123 Some Street</td><td> Crofton MD</td></tr>
-            <tr><td>Jose Smith</td><td>123 Some Street</td><td> Crofton MD</td></tr>
-            <tr><td>Jessie Smith</td><td>123 Some Street</td><td> Crofton MD</td></tr>
+            {% for student_id, student_data in class_data['students']|dictsort %}
+            <tr><td><input type="text" class="form-control" name="{{student_id}}-name" placeholder="Name" value="{{student_data['name']}}" required></td><td><input type="text" class="form-control" name="{{student_id}}-street_address" placeholder="Street Address" value="{{student_data['street_address']}}" required></td><td><input type="text" class="form-control" name="{{student_id}}-city_state" placeholder="City, State" value="{{student_data['city_state']}}" required></td></tr>
+            {% endfor %}
+            <tr><td><input type="text" class="form-control" name="new_student-name" placeholder="Name"></td><td><input type="text" class="form-control" name="new_student-street_address" placeholder="Street Address"></td><td><input type="text" class="form-control" name="new_student-city_state" placeholder="City, State"></td></tr>
           </table>
-        </div>
+          <input type="hidden" name="num_students" value="{{class_data['students']|length}}">
 
     </div> <!--col-md-8 -->
     <div class="col-md-4">
         <div class="panel panel-default">
             <div class="panel-heading">Course info</div>
             <div class="panel-body">
-              <p>Instructor J. Doe</p>
-              <p>Heartsaver CPR</p>
-              <p>Course Date: 10/13/2014</p>
-              <p>Infant: X </p>
-              <p>Child: X </p>
-              <p>Written test: X</p>
+              <p>Instructor: <select name="curr_instructor" class="form-control" placeholder="{{class_data['curr_instructor']}}" value="{{class_data['curr_instructor']}}" required>
+              {% for instructor_id, instructor_name in instructors %}
+                <option value="{{instructor_id}}"{% if class_data['curr_instructor']|int == instructor_id|int %} selected{% endif %}>{{instructor_name}}</option>
+              {% endfor %}
+                </select>
+              </p>
+              <p><select name="course_type" class="form-control" placeholder="" value="{{class_data['curr_course_type']}}" required>
+              {% for course_type_id, course_type_name in course_types %}
+                <option value="{{course_type_id}}"{% if class_data['curr_course_type']|int == course_type_id|int %} selected{% endif %} >{{course_type_name}}</option>
+              {% endfor %}
+                </select>
+              </p>
+              <p>Course Date: <input type="date" class="form-control" name="class_date" placeholder="Course Date" value="{{class_data['class_date']}}"></p>
+              {% for option, value in class_data['options']|dictsort %}
+              <div class="checkbox">
+                  {% if value=="true"%}
+                  <label>
+                      <input type="checkbox" name="{{option}}" checked="checked"/> {{option}}
+                      {% else %}
+                  <label>
+                      <input type="checkbox" name="{{option}}" /> {{option}}
+                      {% endif %}
+                  </label>
+              </div>
+              {% endfor %}
             </div>
         </div>
     </div>
+</div>
 
+<div class="btn-toolbar" role="group">
+    <button id='submit' type="submit" class="btn btn-success">Save</button>
+    <a href="/class/{{class_id}}/" class="btn btn-danger">Cancel</a>
 </div>
 
 </form>
 
 
+<p>{{request_data}}</p>
 
 {% endblock %}
