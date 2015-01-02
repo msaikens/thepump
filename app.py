@@ -127,14 +127,8 @@ def render_edit_class(class_data, request_data):
 @app.route("/class/")
 def upcoming():
     #TODO: pull upcoming classes from database
-    edit = request.args.get('edit', 'false')
-
-    if edit == 'true':
-        #todo: create empty class, send class data
-        return render_template('editclass.html')
-
-
-    return render_template('class.html')
+    upcoming_classes = {12345:{'course_type':"Heartsaver CPR",'course_date':"1/30/2015",'instructor':"J. Richmond"}, 123:{'course_type':"Heartsaver CPR",'course_date':"2/18/2015",'instructor':"J. Richmond"}}
+    return render_template('class.html', upcoming_classes=upcoming_classes)
 
 @app.route("/historic/")
 def historic():
