@@ -37,11 +37,9 @@
           <!-- Table -->
           <table class="table">
             <tr><th>Name</th><th>Street Address</th><th>City, State</th></tr>
-            <tr><td>Joe Smith</td><td>123 Some Street</td><td> Crofton MD</td></tr>
-            <tr><td>Jane Smith</td><td>123 Some Street</td><td> Crofton MD</td></tr>
-            <tr><td>Peter Smith</td><td>123 Some Street</td><td> Crofton MD</td></tr>
-            <tr><td>Jose Smith</td><td>123 Some Street</td><td> Crofton MD</td></tr>
-            <tr><td>Jessie Smith</td><td>123 Some Street</td><td> Crofton MD</td></tr>
+            {% for student_id, student_data in class_data['students']|dictsort %}
+            <tr><td>{{student_data['name']}}</td><td>{{student_data['street_address']}}</td><td>{{student_data['city_state']}}</td></tr>
+            {% endfor %}
           </table>
         </div>
 
@@ -50,12 +48,12 @@
         <div class="panel panel-default">
             <div class="panel-heading">Course info</div>
             <div class="panel-body">
-              <p>Instructor J. Doe</p>
-              <p>Heartsaver CPR</p>
-              <p>Course Date: 10/13/2014</p>
-              <p>Infant: X </p>
-              <p>Child: X </p>
-              <p>Written test: X</p>
+              <p>Instructor {{class_data['curr_instructor']}}</p>
+              <p>{{class_data['curr_course_type']}}</p>
+              <p>Course Date: {{class_data['class_date']}}</p>
+              <p>Infant: {% if class_data['options']['Infant'] == 'true' %}X{% endif %} </p>
+              <p>Child: {% if class_data['options']['Child'] == 'true' %}X{% endif %} </p>
+              <p>Written test: {% if class_data['options']['Written'] == 'true' %}X{% endif %}</p>
             </div>
         </div>
     </div>

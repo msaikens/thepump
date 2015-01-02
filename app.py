@@ -1,12 +1,17 @@
 import os
-from flask import Flask, request, render_template, send_from_directory
+from flask import Flask, request, render_template, send_from_directory, redirect
 import json
+from pymongo import MongoClient
+from bson.objectid import ObjectId
+
+MONGODB_URI = os.environ['MONGOLAB_URI']
 
 # initialization
 app = Flask(__name__)
+app.config.from_object(__name__)
+
 if os.environ['DEBUG'] == 'true':
     app.debug = True
-
 
 # controllers
 @app.route('/favicon.ico')
@@ -21,28 +26,38 @@ def page_not_found(e):
 def index():
     return render_template('index.html')
 
-@app.route("/class/<int:class_id>/", methods=['GET'])
+@app.route("/class/new/")
+def new_class():
+    # create blank class
+    class_data={}
+
+    class_data['students'] = {}
+    #TODO: pull options from lookup table
+    class_data['options'] = {'Child':'false',"Infants":'false','Written':'false'}
+    class_data['class_date'] = ""
+    class_data['_id'] = 0
+    class_data['curr_instructor'] = 0
+    class_data['curr_course_type'] = 0
+    return render_edit_class(class_data, '')
+
+@app.route("/class/<class_id>/", methods=['GET'])
 def show_class(class_id):
-    #TODO: pull class details for selected class
+
+    # pull class details for selected class
+    client = MongoClient(MONGODB_URI)
+    db = client.get_default_database()
+    courses = db['courses']
+    class_data = courses.find_one({"_id": ObjectId(class_id)})
+    client.close()
+
     edit = request.args.get('edit', 'false')
 
     if edit == 'true':
-        #todo: send class data
-
-        #fake data for now
-        class_data={}
-
-        class_data['students'] = {'student_0':{'name':"John Doe",'street_address':"123 Fake Street",'city_state':"Cofton, MD 21114"},'student_1':{'name':"Jane Doe",'street_address':"123 Fake Street",'city_state':"Cofton, MD 21114"},'student_2':{'name':"Jose Doe",'street_address':"123 Fake Street",'city_state':"Cofton, MD 21114"}}
-        class_data['options'] = {'Child':'true',"Infants":'true','Written':'false'}
-        class_data['class_date'] = "12/31/2014"
-        class_data['class_id'] = 123
-        class_data['curr_instructor'] = 12345
-        class_data['curr_course_type'] = 1
         return render_edit_class(class_data, '')
 
-    return render_template('showclass.html', class_data = "nop")
+    return render_template('showclass.html', class_data = class_data)
 
-@app.route("/class/<int:class_id>/", methods=['POST'])
+@app.route("/class/<class_id>/", methods=['POST'])
 def update_class(class_id):
     #TODO: update class details, then show class
 
@@ -54,7 +69,8 @@ def update_class(class_id):
     try:
         class_data['curr_instructor']=request.form['curr_instructor']
         class_data['class_date']=request.form['class_date']
-        class_data['class_id']=class_id
+        if class_id != '0':
+            class_data['_id']=ObjectId(class_id)
         class_data['curr_course_type']=request.form['course_type']
 
         #pull options. #TODO: pull available options from lookup table
@@ -107,28 +123,29 @@ def update_class(class_id):
     except KeyError:
         error = True
 
+
+    #persist to datastore
+    client = MongoClient(MONGODB_URI)
+    db = client.get_default_database()
+    courses = db['courses']
+    #if new class, create new record
+    course_id = courses.save(class_data)
+    class_data['_id'] = course_id
+
+    client.close()
+
     if edit == 'true':
         if os.environ['DEBUG'] == 'true':
             request_data = request.form
         else:
             request_data = ''
 
-        return render_edit_class(class_data, request_data)
+        if class_id == '0':
+            return redirect('/class/'+str(course_id)+'/', code=303)
+        else:
+            return render_edit_class(class_data, request_data)
 
     return render_template('showclass.html', class_data="nop")
-
-@app.route("/class/new/")
-def new_class():
-    #fake data for now
-    class_data={}
-
-    class_data['students'] = {}
-    class_data['options'] = {'Child':'false',"Infants":'false','Written':'false'}
-    class_data['class_date'] = ""
-    class_data['class_id'] = 0
-    class_data['curr_instructor'] = 0
-    class_data['curr_course_type'] = 0
-    return render_edit_class(class_data, '')
 
 
 def render_edit_class(class_data, request_data):
@@ -141,7 +158,14 @@ def render_edit_class(class_data, request_data):
 @app.route("/class/")
 def upcoming():
     #TODO: pull upcoming classes from database
-    upcoming_classes = {12345:{'course_type':"Heartsaver CPR",'course_date':"1/30/2015",'instructor':"J. Richmond"}, 123:{'course_type':"Heartsaver CPR",'course_date':"2/18/2015",'instructor':"J. Richmond"}}
+    client = MongoClient(MONGODB_URI)
+    db = client.get_default_database()
+    courses = db['courses']
+    upcoming_classes = {}
+    for course in courses.find():
+        upcoming_classes[str(course['_id'])] = {'course_type':course['curr_course_type'],'course_date':course['class_date'],'instructor':course['curr_instructor']}
+    client.close()
+
     return render_template('class.html', upcoming_classes=upcoming_classes)
 
 @app.route("/historic/")

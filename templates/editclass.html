@@ -3,7 +3,7 @@
 {% block title %} - Edit Class{% endblock %}
 {% block content %}
 
-<form action="/class/{{class_data['class_id']}}/?edit=true" method="post">
+<form action="/class/{{class_data['_id']}}/?edit=true" method="post">
 
 <div class="row">
     <div class="col-md-8 form-group">
@@ -54,7 +54,7 @@
 
 <div class="btn-toolbar" role="group">
     <button id='submit' type="submit" class="btn btn-success">Save</button>
-    <a href="/class/{{class_data['class_id']}}/" class="btn btn-danger">Cancel</a>
+    <a href="/class/{{class_data['_id']}}/" class="btn btn-danger">Cancel</a>
 </div>
 
 </form>
