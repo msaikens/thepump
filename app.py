@@ -50,6 +50,10 @@ def new_class():
 @app.route("/class/<class_id>/", methods=['GET'])
 def show_class(class_id):
 
+    #redirect if someone cancels creating a new class
+    if class_id == '0':
+        return redirect('/class/', code=301)
+
     # pull class details for selected class
     client = MongoClient(MONGODB_URI)
     db = client.get_default_database()
@@ -252,7 +256,9 @@ def new_instructor():
 @app.route("/instructor/<instructor_id>/", methods=['GET'])
 def view_instructor(instructor_id):
     edit = request.args.get('edit', 'false')
-
+    #redirect if someone cancels creating a new instructor
+    if instructor_id == '0':
+        return redirect('/instructor/', code=301)
 
     # pull class details for selected class
     client = MongoClient(MONGODB_URI)
