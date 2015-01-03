@@ -59,7 +59,9 @@
 
 </form>
 
-
+{% if debug %}
+<p>DEBUG:</p>
 <p>{{request_data}}</p>
+{% endif %}
 
 {% endblock %}

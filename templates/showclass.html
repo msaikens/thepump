@@ -59,7 +59,9 @@
     </div>
 </div>
 
-<p>Debug: {{class_data}}</p>
-
+{% if debug %}
+<p>Debug:</p>
+<p>{{class_data}}</p>
+{% endif %}
 
 {% endblock %}

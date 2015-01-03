@@ -11,11 +11,13 @@ MONGODB_URI = os.environ['MONGOLAB_URI']
 
 COURSE_TYPES = {1:"Heartsaver CPR",2:"Heartsaver First Aid",3:"Heartsaver CPR/First Aid",4:"Healthcare Provider"}
 
+DEBUG = (os.environ['DEBUG'] == 'true')
+
 # initialization
 app = Flask(__name__)
 app.config.from_object(__name__)
 
-if os.environ['DEBUG'] == 'true':
+if DEBUG:
     app.debug = True
 
 # controllers
@@ -29,7 +31,7 @@ def page_not_found(e):
 
 @app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template('index.html', debug=DEBUG)
 
 @app.route("/class/new/")
 def new_class():
@@ -60,7 +62,7 @@ def show_class(class_id):
     if edit == 'true':
         return render_edit_class(class_data, '')
 
-    return render_template('showclass.html', class_data = class_data)
+    return render_template('showclass.html', class_data = class_data, debug=DEBUG)
 
 @app.route("/class/<class_id>/", methods=['POST'])
 def update_class(class_id):
@@ -171,7 +173,7 @@ def update_class(class_id):
         else:
             return render_edit_class(class_data, request_data)
 
-    return render_template('showclass.html', class_data="nop")
+    return render_template('showclass.html', class_data=class_data)
 
 
 def render_edit_class(class_data, request_data):
@@ -185,7 +187,7 @@ def render_edit_class(class_data, request_data):
         instructors_list.append({"_id":str(next_instructor['_id']),"name":next_instructor['instructor_name']})
     client.close()
 
-    return render_template('editclass.html',class_data = class_data, instructors=instructors_list, course_types=COURSE_TYPES, request_data=request_data)
+    return render_template('editclass.html',class_data = class_data, instructors=instructors_list, course_types=COURSE_TYPES, request_data=request_data, debug=DEBUG)
 
 
 @app.route("/class/")
@@ -201,7 +203,7 @@ def upcoming():
         upcoming_classes.append({'_id':course['_id'],'course_type':course['curr_course_type'],'course_date':course['class_date'],'instructor':course['curr_instructor']['instructor_name']})
     client.close()
 
-    return render_template('class.html', class_list=upcoming_classes, page_name="Upcoming Classes", page_id="upcoming")
+    return render_template('class.html', class_list=upcoming_classes, page_name="Upcoming Classes", page_id="upcoming", debug=DEBUG)
 
 @app.route("/historic/")
 def historic():
@@ -216,7 +218,7 @@ def historic():
         upcoming_classes.append({'_id':course['_id'],'course_type':course['curr_course_type'],'course_date':course['class_date'],'instructor':course['curr_instructor']['instructor_name']})
     client.close()
 
-    return render_template('class.html', class_list=upcoming_classes, page_name="Historic Classes", page_id="historic")
+    return render_template('class.html', class_list=upcoming_classes, page_name="Historic Classes", page_id="historic", debug=DEBUG)
 
 @app.route("/instructor/")
 def instructors():
@@ -231,7 +233,7 @@ def instructors():
         instructors_list.append({"_id":str(next_instructor['_id']),"name":next_instructor['instructor_name']})
     client.close()
 
-    return render_template('instructors.html', instructors=instructors_list)
+    return render_template('instructors.html', instructors=instructors_list, debug=DEBUG)
 
 @app.route("/instructor/new/")
 def new_instructor():
@@ -245,7 +247,7 @@ def new_instructor():
         "training_center_id":"",
         "training_center_address":""}
 
-    return render_template('edit_instructor.html', instructor=instructor)
+    return render_template('edit_instructor.html', instructor=instructor, debug=DEBUG)
 
 @app.route("/instructor/<instructor_id>/", methods=['GET'])
 def view_instructor(instructor_id):
@@ -261,9 +263,9 @@ def view_instructor(instructor_id):
 
 
     if edit == 'true':
-        return render_template('edit_instructor.html', instructor=instructor)
+        return render_template('edit_instructor.html', instructor=instructor, debug=DEBUG)
 
-    return render_template('view_instructor.html', instructor=instructor)
+    return render_template('view_instructor.html', instructor=instructor, debug=DEBUG)
 
 @app.route("/instructor/<instructor_id>/", methods=['POST'])
 def update_instructor(instructor_id):
@@ -299,9 +301,9 @@ def update_instructor(instructor_id):
         if instructor_id == '0':
             return redirect('/instructor/'+str(real_instructor_id)+'/', code=303)
         else:
-            return render_template('edit_instructor.html', instructor=instructor)
+            return render_template('edit_instructor.html', instructor=instructor, debug=DEBUG)
 
-    return render_template('view_instructor.html', instructor=instructor)
+    return render_template('view_instructor.html', instructor=instructor, debug=DEBUG)
 
 
 # launch
