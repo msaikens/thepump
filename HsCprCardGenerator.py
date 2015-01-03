@@ -66,7 +66,7 @@ def generate_pdf(
 def generate_cards_with_background(pdf):
     dir = os.path.realpath('.')
     #cards
-    cards_filename = os.path.join(dir, 'templates','HS_CPR_2_card.pdf')
+    cards_filename = os.path.join(dir, 'pdf_templates','HS_CPR_2_card.pdf')
 
     cards = PdfFileReader(file(cards_filename, "rb"))
 

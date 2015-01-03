@@ -240,6 +240,32 @@ def gen_class_skillsheets(class_id):
     response.mimetype = 'application/pdf'
     return response
 
+@app.route("/class/<class_id>/roster/")
+def gen_class_roster(class_id):
+    # pull class details for selected class
+    client = MongoClient(MONGODB_URI)
+    db = client.get_default_database()
+    courses = db['courses']
+    class_data = courses.find_one({"_id": ObjectId(class_id)})
+    if 'card_issue_date' not in class_data:
+        today = datetime.now()
+        class_data['card_issue_date'] = today
+        class_data['card_expire_date'] = today.replace(year=today.year + 2)
+        courses.save(class_data)
+    client.close()
+
+    roster = HsCprRosterGenerator.generate_pdf(class_data)
+
+    output = StringIO.StringIO()
+    roster.write(output)
+    pdf_out = output.getvalue()
+    output.close()
+
+    response = make_response(pdf_out)
+    response.headers['Content-Disposition'] = "attachment; filename='roster.pdf"
+    response.mimetype = 'application/pdf'
+    return response
+
 @app.route("/class/")
 def upcoming():
     #pull upcoming classes from database

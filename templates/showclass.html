@@ -11,18 +11,18 @@
           <div class="panel-heading">Roster</div>
           <div class="panel-body">
             <div class="btn-group">
-              <button type="button" class="btn btn-default">
+              <a href='{{ request.url }}roster/' type="button" class="btn btn-default">
                   <span class="glyphicon glyphicon-print" aria-hidden="true"></span>
                   Print Roster
-              </button>
+              </a>
               <a href='{{ request.url }}skillsheets/' type="button" class="btn btn-default">
                       <span class="glyphicon glyphicon-print" aria-hidden="true"></span>
                       Print Skill Sheets
               </a>
-              <button type="button" class="btn btn-default">
+              <a href='{{ request.url }}cards/' type="button" class="btn btn-default">
                   <span class="glyphicon glyphicon-print" aria-hidden="true"></span>
                   Print Cards
-              </button>
+              </a>
             </div>
             <div class="btn group">
                 <a href='{{ request.url }}?edit=true'>
@@ -54,10 +54,14 @@
               <p>{{class_data['curr_course_type']}}</p>
               <p>Student/Manikin Ratio: {{class_data['student_manikin_ratio']}}</p>
               {% for option, value in class_data['options']|dictsort %}
-              <p> {{option}}: {% if value %}X{% endif %}
+              <p> {{option}}: {% if value %}
+                  <span class="glyphicon glyphicon-ok-circle"></span>
+                  {% else %}
+                  <span class="glyphicon glyphicon-ban-circle"></span>
+                  {% endif %}
               {% endfor %}
-              <p>Card Issue Date: #TODO</p>
-              <p>Card Expire Date: #TODO</p>
+              <p>Card Issue Date: {{class_data['card_issue_date']}}</p>
+              <p>Card Expire Date: {{class_data['card_expire_date'] }}</p>
             </div>
         </div>
     </div>
