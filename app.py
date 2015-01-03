@@ -38,8 +38,10 @@ def new_class():
     # create blank class
     class_data={}
 
-    class_data['students'] = {}
+    class_data['students'] = []
     #TODO: pull options from lookup table
+    class_data['class_location'] = ''
+    class_data['student_manikin_ratio'] = ''
     class_data['options'] = {'Child':'false',"Infants":'false','Written':'false'}
     class_data['class_date'] = datetime.today()
     class_data['_id'] = 0
@@ -86,6 +88,9 @@ def update_class(class_id):
         instructor = instructors.find_one({"_id": ObjectId(request.form['curr_instructor'])})
 
         class_data['curr_instructor']=instructor
+
+        class_data['class_location'] = request.form['class_location']
+        class_data['student_manikin_ratio'] = request.form['student_manikin_ratio']
 
         #convert date to datetime
         try:

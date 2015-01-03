@@ -49,11 +49,15 @@
             <div class="panel-heading">Course info</div>
             <div class="panel-body">
               <p>Instructor {{class_data['curr_instructor']['instructor_name']}}</p>
-              <p>{{class_data['curr_course_type']}}</p>
               <p>Course Date: {{class_data['class_date'].strftime('%m/%d/%Y')}}</p>
+              <p>Course Location: {{class_data['class_location']}}</p>
+              <p>{{class_data['curr_course_type']}}</p>
+              <p>Student/Manikin Ratio: {{class_data['student_manikin_ratio']}}</p>
               {% for option, value in class_data['options']|dictsort %}
               <p> {{option}}: {% if value == 'true' %}X{% endif %}
               {% endfor %}
+              <p>Card Issue Date: #TODO</p>
+              <p>Card Expire Date: #TODO</p>
             </div>
         </div>
     </div>
