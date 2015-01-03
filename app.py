@@ -10,6 +10,7 @@ import HsCprSkillsGenerator
 import HsCprRosterGenerator
 import StringIO
 from PyPDF2 import PdfFileMerger, PdfFileReader
+import itertools
 
 
 
@@ -236,6 +237,7 @@ def gen_class_skillsheets(class_id):
 
 
     response = make_response(pdf_out)
+    #TODO: better filenames
     response.headers['Content-Disposition'] = "attachment; filename='skillsheets.pdf"
     response.mimetype = 'application/pdf'
     return response
@@ -262,9 +264,78 @@ def gen_class_roster(class_id):
     output.close()
 
     response = make_response(pdf_out)
+    #TODO: better filenames
     response.headers['Content-Disposition'] = "attachment; filename='roster.pdf"
     response.mimetype = 'application/pdf'
     return response
+
+@app.route("/class/<class_id>/cards/")
+def gen_class_cards(class_id):
+    # pull class details for selected class
+    client = MongoClient(MONGODB_URI)
+    db = client.get_default_database()
+    courses = db['courses']
+    class_data = courses.find_one({"_id": ObjectId(class_id)})
+    #set card issue date to today
+    today = datetime.now()
+    class_data['card_issue_date'] = today
+    class_data['card_expire_date'] = today.replace(year=today.year + 2)
+    courses.save(class_data)
+    client.close()
+
+    print_cards = []
+    for student1, student2 in grouper(class_data['students'], 2):
+        if(student2 != None):
+            next_card_mask = HsCprCardGenerator.generate_pdf(
+                tc_name=class_data['curr_instructor']["training_center_name"]+" "+class_data['curr_instructor']["training_center_id"],
+                tc_address=class_data['curr_instructor']["training_center_address"],
+                course_location=class_data["class_location"],
+                instructor_name_id=class_data['curr_instructor']["instructor_name"]+" "+class_data['curr_instructor']["instructor_id"],
+                issue_date=class_data["card_issue_date"].strftime("%m/%y"),
+                expire_date=class_data["card_expire_date"].strftime("%m/%y"),
+                test=class_data['options']['Written'], child=class_data['options']['Child'], infant=class_data['options']['Infants'],
+                student1_name=student1["name"],
+                student1_address_1=student1["street_address"],
+                student1_address_2=student1["city_state"],
+                student2_name=student2["name"],
+                student2_address_1=student2["street_address"],
+                student2_address_2=student2["city_state"])
+        else:
+            next_card_mask = HsCprCardGenerator.generate_pdf(
+                tc_name=class_data['curr_instructor']["training_center_name"]+" "+class_data['curr_instructor']["training_center_id"],
+                tc_address=class_data['curr_instructor']["training_center_address"],
+                course_location=class_data["class_location"],
+                instructor_name_id=class_data['curr_instructor']["instructor_name"]+" "+class_data['curr_instructor']["instructor_id"],
+                issue_date=class_data["card_issue_date"].strftime("%m/%y"),
+                expire_date=class_data["card_expire_date"].strftime("%m/%y"),
+                test=class_data['options']['Written'], child=class_data['options']['Child'], infant=class_data['options']['Infants'],
+                student1_name=student1["name"],
+                student1_address_1=student1["street_address"],
+                student1_address_2=student1["city_state"])
+
+        print_card = HsCprCardGenerator.generate_cards_with_no_background(next_card_mask)
+
+        pc_packet = StringIO.StringIO()
+        print_card.write(pc_packet)
+        print_cards.append(pc_packet)
+
+    merged_print_cards = PdfFileMerger()
+    for next_print_card in print_cards:
+        next_print_card.seek(0)
+        merged_print_cards.append(PdfFileReader(next_print_card))
+
+
+    output = StringIO.StringIO()
+    merged_print_cards.write(output)
+    pdf_out = output.getvalue()
+    output.close()
+
+    response = make_response(pdf_out)
+    #TODO: better filenames
+    response.headers['Content-Disposition'] = "attachment; filename='cards.pdf"
+    response.mimetype = 'application/pdf'
+    return response
+
 
 @app.route("/class/")
 def upcoming():
@@ -382,6 +453,13 @@ def update_instructor(instructor_id):
             return render_template('edit_instructor.html', instructor=instructor, debug=DEBUG)
 
     return render_template('view_instructor.html', instructor=instructor, debug=DEBUG)
+
+#helper class
+def grouper(iterable, n, fillvalue=None):
+    "Collect data into fixed-length chunks or blocks"
+    # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
+    args = [iter(iterable)] * n
+    return itertools.izip_longest(fillvalue=fillvalue, *args)
 
 # launch
 if __name__ == "__main__":
