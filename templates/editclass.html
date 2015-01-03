@@ -34,7 +34,7 @@
               {% endfor %}
                 </select>
               </p>
-              <p>Course Date: <input type="date" class="form-control" name="class_date" placeholder="Course Date" value="{{class_data['class_date']}}"></p>
+              <p>Course Date: <input type="date" class="form-control" name="class_date" placeholder="Course Date" value="{{class_data['class_date'].strftime('%m/%d/%Y')}}"></p>
               {% for option, value in class_data['options']|dictsort %}
               <div class="checkbox">
                   {% if value=="true"%}

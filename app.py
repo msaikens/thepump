@@ -3,6 +3,9 @@ from flask import Flask, request, render_template, send_from_directory, redirect
 import json
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+from datetime import datetime
+import pymongo
+
 
 MONGODB_URI = os.environ['MONGOLAB_URI']
 
@@ -34,7 +37,7 @@ def new_class():
     class_data['students'] = {}
     #TODO: pull options from lookup table
     class_data['options'] = {'Child':'false',"Infants":'false','Written':'false'}
-    class_data['class_date'] = ""
+    class_data['class_date'] = datetime.today()
     class_data['_id'] = 0
     class_data['curr_instructor'] = 0
     class_data['curr_course_type'] = 0
@@ -68,7 +71,13 @@ def update_class(class_id):
 
     try:
         class_data['curr_instructor']=request.form['curr_instructor']
-        class_data['class_date']=request.form['class_date']
+
+        #convert date to datetime
+        try:
+            class_data['class_date'] = datetime.strptime(request.form['class_date'], '%m/%d/%Y')
+        except ValueError:
+            error = True
+
         if class_id != '0':
             class_data['_id']=ObjectId(class_id)
         class_data['curr_course_type']=request.form['course_type']
@@ -151,32 +160,46 @@ def update_class(class_id):
 def render_edit_class(class_data, request_data):
     #TODO: pull real data
     instructors = [[12345, "J. Richmond"],[567789, "C. Richmond"],[145643, "J. Tobin"]]
-    course_types = [[1,"Heartsaver CPR"],[2,"Heartsaver First Aid"],[3,"Heartsaver CPR/First Aid"],[4,"Healthcare Provider"]]
+    course_types = [["Heartsaver CPR","Heartsaver CPR"],["Heartsaver First Aid","Heartsaver First Aid"],["Heartsaver CPR/First Aid","Heartsaver CPR/First Aid"],["Healthcare Provider","Healthcare Provider"]]
     return render_template('editclass.html',class_data = class_data, instructors=instructors, course_types=course_types, request_data=request_data)
 
 
 @app.route("/class/")
 def upcoming():
-    #TODO: pull upcoming classes from database
+    #pull upcoming classes from database
     client = MongoClient(MONGODB_URI)
     db = client.get_default_database()
     courses = db['courses']
-    upcoming_classes = {}
-    for course in courses.find():
-        upcoming_classes[str(course['_id'])] = {'course_type':course['curr_course_type'],'course_date':course['class_date'],'instructor':course['curr_instructor']}
+    upcoming_classes = []
+    courses.ensure_index("class_date", pymongo.DESCENDING)
+    sorted_classes = list(courses.find({"class_date":{"$gte":datetime.now()}}).sort("class_date",pymongo.DESCENDING))
+    for course in sorted_classes:
+        upcoming_classes.append({'course_type':course['curr_course_type'],'course_date':course['class_date'],'instructor':course['curr_instructor']})
     client.close()
 
-    return render_template('class.html', upcoming_classes=upcoming_classes)
+    return render_template('class.html', class_list=upcoming_classes, page_name="Upcoming Classes", page_id="upcoming")
 
 @app.route("/historic/")
 def historic():
-    #TODO: pull historic classes from database
-    return render_template('historic.html')
+    #pull upcoming classes from database
+    client = MongoClient(MONGODB_URI)
+    db = client.get_default_database()
+    courses = db['courses']
+    upcoming_classes = []
+    courses.ensure_index("class_date", pymongo.DESCENDING)
+    sorted_classes = list(courses.find({"class_date":{"$lt":datetime.now()}}).sort("class_date",pymongo.DESCENDING))
+    for course in sorted_classes:
+        upcoming_classes.append({'course_type':course['curr_course_type'],'course_date':course['class_date'],'instructor':course['curr_instructor']})
+    client.close()
+
+    return render_template('class.html', class_list=upcoming_classes, page_name="Historic Classes", page_id="historic")
 
 @app.route("/instructors/")
 def instructors():
     #TODO: pull upcoming classes from database
-    return render_template('instructors.html')
+
+    instructors = [{"_id":12345,"name":"J. Richmond"},{"_id":567789, "name":"C. Richmond"},{"_id":145643, "name":"J. Tobin"}]
+    return render_template('instructors.html', instructors=instructors)
 
 # launch
 if __name__ == "__main__":

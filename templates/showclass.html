@@ -50,7 +50,7 @@
             <div class="panel-body">
               <p>Instructor {{class_data['curr_instructor']}}</p>
               <p>{{class_data['curr_course_type']}}</p>
-              <p>Course Date: {{class_data['class_date']}}</p>
+              <p>Course Date: {{class_data['class_date'].strftime('%m/%d/%Y')}}</p>
               <p>Infant: {% if class_data['options']['Infant'] == 'true' %}X{% endif %} </p>
               <p>Child: {% if class_data['options']['Child'] == 'true' %}X{% endif %} </p>
               <p>Written test: {% if class_data['options']['Written'] == 'true' %}X{% endif %}</p>

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% set active_page = "class" %}
-{% block title %} - Upcoming Classes{% endblock %}
+{% set active_page = page_id %}
+{% block title %} - {{page_name}}{% endblock %}
 {% block content %}
 
 <p>Upcoming Classes</p>
@@ -8,8 +8,8 @@
 
 <table class="table">
     <tr><th>Course Date</th><th>Course Type</th><th>Instructor</th></tr>
-    {% for course_id, course_data in upcoming_classes.iteritems() %}
-    <tr><td>{{course_data['course_date']}}</td>
+    {% for course_data in class_list %}
+    <tr><td>{{course_data['course_date'].strftime('%m/%d/%Y')}}</td>
         <td>{{course_data['course_type']}}</td>
         <td>{{course_data['instructor']}}</td>
         <td><a href="/class/{{course_id}}/" class="btn btn-default"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> View</a></td>
