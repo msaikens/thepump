@@ -39,7 +39,7 @@ def new_class():
     class_data['options'] = {'Child':'false',"Infants":'false','Written':'false'}
     class_data['class_date'] = datetime.today()
     class_data['_id'] = 0
-    class_data['curr_instructor'] = 0
+    class_data['curr_instructor'] = {}
     class_data['curr_course_type'] = 0
     return render_edit_class(class_data, '')
 
@@ -66,11 +66,18 @@ def update_class(class_id):
 
     edit = request.args.get('edit', 'false')
 
+    #open up database early so that we can pull instructor details
+    client = MongoClient(MONGODB_URI)
+    db = client.get_default_database()
+
     #map request data into our data object
     class_data={}
 
     try:
-        class_data['curr_instructor']=request.form['curr_instructor']
+        instructors = db['instructors']
+        instructor = instructors.find_one({"_id": ObjectId(request.form['curr_instructor'])})
+
+        class_data['curr_instructor']=instructor
 
         #convert date to datetime
         try:
@@ -134,8 +141,7 @@ def update_class(class_id):
 
 
     #persist to datastore
-    client = MongoClient(MONGODB_URI)
-    db = client.get_default_database()
+
     courses = db['courses']
     #if new class, create new record
     course_id = courses.save(class_data)
@@ -182,7 +188,7 @@ def upcoming():
     courses.ensure_index("class_date", pymongo.DESCENDING)
     sorted_classes = list(courses.find({"class_date":{"$gte":datetime.now()}}).sort("class_date",pymongo.DESCENDING))
     for course in sorted_classes:
-        upcoming_classes.append({'_id':course['_id'],'course_type':course['curr_course_type'],'course_date':course['class_date'],'instructor':course['curr_instructor']})
+        upcoming_classes.append({'_id':course['_id'],'course_type':course['curr_course_type'],'course_date':course['class_date'],'instructor':course['curr_instructor']['instructor_name']})
     client.close()
 
     return render_template('class.html', class_list=upcoming_classes, page_name="Upcoming Classes", page_id="upcoming")
@@ -197,7 +203,7 @@ def historic():
     courses.ensure_index("class_date", pymongo.DESCENDING)
     sorted_classes = list(courses.find({"class_date":{"$lt":datetime.now()}}).sort("class_date",pymongo.DESCENDING))
     for course in sorted_classes:
-        upcoming_classes.append({'_id':course['_id'],'course_type':course['curr_course_type'],'course_date':course['class_date'],'instructor':course['curr_instructor']})
+        upcoming_classes.append({'_id':course['_id'],'course_type':course['curr_course_type'],'course_date':course['class_date'],'instructor':course['curr_instructor']['instructor_name']})
     client.close()
 
     return render_template('class.html', class_list=upcoming_classes, page_name="Historic Classes", page_id="historic")

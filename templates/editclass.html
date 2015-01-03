@@ -22,15 +22,15 @@
         <div class="panel panel-default">
             <div class="panel-heading">Course info</div>
             <div class="panel-body">
-              <p>Instructor: <select name="curr_instructor" class="form-control" placeholder="{{class_data['curr_instructor']}}" value="{{class_data['curr_instructor']}}" required>
+              <p>Instructor: <select name="curr_instructor" class="form-control" placeholder="{{class_data['curr_instructor']['_id']}}" value="{{class_data['curr_instructor']['_id']}}" required>
               {% for instructor in instructors %}
-                <option value="{{instructor['_id']}}"{% if class_data['curr_instructor'] == instructor['_id'] %} selected{% endif %}>{{instructor['name']}}</option>
+                <option value="{{instructor['_id']}}"{% if class_data['curr_instructor']['_id']|string == instructor['_id'] %} selected{% endif %}>{{instructor['name']}}</option>
               {% endfor %}
                 </select>
               </p>
               <p><select name="course_type" class="form-control" placeholder="" value="{{class_data['curr_course_type']}}" required>
               {% for course_type_id, course_type_name in course_types %}
-                <option value="{{course_type_id}}"{% if class_data['curr_course_type']|int == course_type_id|int %} selected{% endif %} >{{course_type_name}}</option>
+                <option value="{{course_type_id}}"{% if class_data['curr_course_type'] == course_type_id %} selected{% endif %} >{{course_type_name}}</option>
               {% endfor %}
                 </select>
               </p>
