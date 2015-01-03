@@ -45,7 +45,7 @@
 
               {% for option, value in class_data['options']|dictsort %}
               <div class="checkbox">
-                  {% if value=="true"%}
+                  {% if value%}
                   <label>
                       <input type="checkbox" name="{{option}}" checked="checked"/> {{option}}
                       {% else %}

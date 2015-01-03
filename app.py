@@ -1,17 +1,23 @@
 import os
-from flask import Flask, request, render_template, send_from_directory, redirect
+from flask import Flask, request, render_template, send_from_directory, redirect, make_response
 import json
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from datetime import datetime
 import pymongo
+import HsCprCardGenerator
+import HsCprSkillsGenerator
+import HsCprRosterGenerator
+import StringIO
+from PyPDF2 import PdfFileMerger, PdfFileReader
+
 
 
 MONGODB_URI = os.environ['MONGOLAB_URI']
 
 COURSE_TYPES = {1:"Heartsaver CPR",2:"Heartsaver First Aid",3:"Heartsaver CPR/First Aid",4:"Healthcare Provider"}
 
-DEBUG = (os.environ['DEBUG'] == 'true')
+DEBUG = os.environ.get('DEBUG', False)
 
 # initialization
 app = Flask(__name__)
@@ -42,7 +48,7 @@ def new_class():
     #TODO: pull options from lookup table
     class_data['class_location'] = ''
     class_data['student_manikin_ratio'] = ''
-    class_data['options'] = {'Child':'false',"Infants":'false','Written':'false'}
+    class_data['options'] = {'Child':False,"Infants":False,'Written':False}
     class_data['class_date'] = datetime.today()
     class_data['_id'] = 0
     class_data['curr_instructor'] = {}
@@ -110,19 +116,19 @@ def update_class(class_id):
         class_data['options'] = {}
 
         if 'Child' in request.form:
-            class_data['options']['Child'] = 'true'
+            class_data['options']['Child'] = True
         else:
-            class_data['options']['Child'] = 'false'
+            class_data['options']['Child'] = False
 
         if 'Infants' in request.form:
-            class_data['options']['Infants'] = 'true'
+            class_data['options']['Infants'] = True
         else:
-            class_data['options']['Infants'] = 'false'
+            class_data['options']['Infants'] = False
 
         if 'Written' in request.form:
-            class_data['options']['Written'] = 'true'
+            class_data['options']['Written'] = True
         else:
-            class_data['options']['Written'] = 'false'
+            class_data['options']['Written'] = False
 
     except KeyError:
         #todo: something here
@@ -198,6 +204,41 @@ def render_edit_class(class_data, request_data):
 
     return render_template('editclass.html',class_data = class_data, instructors=instructors_list, course_types=COURSE_TYPES, request_data=request_data, debug=DEBUG)
 
+@app.route("/class/<class_id>/skillsheets/")
+def gen_class_skillsheets(class_id):
+    # pull class details for selected class
+    client = MongoClient(MONGODB_URI)
+    db = client.get_default_database()
+    courses = db['courses']
+    class_data = courses.find_one({"_id": ObjectId(class_id)})
+    client.close()
+
+    output = StringIO.StringIO()
+    skillsheets = []
+
+    for row in class_data['students']:
+        if(row["name"] != ''):
+            next_skillsheet = HsCprSkillsGenerator.generate_pdf(row["name"],
+                class_data["class_date"].strftime("%m/%d/%y"), class_data['curr_instructor']['instructor_name'],
+                adult=True, child=class_data['options']['Child'], infant=class_data['options']['Infants'])
+            ss_packet = StringIO.StringIO()
+            next_skillsheet.write(ss_packet)
+            skillsheets.append(ss_packet)
+
+    merged_skillsheets = PdfFileMerger()
+    for next_skillsheet in skillsheets:
+        next_skillsheet.seek(0)
+        merged_skillsheets.append(PdfFileReader(next_skillsheet))
+
+    merged_skillsheets.write(output)
+    pdf_out = output.getvalue()
+    output.close()
+
+
+    response = make_response(pdf_out)
+    response.headers['Content-Disposition'] = "attachment; filename='skillsheets.pdf"
+    response.mimetype = 'application/pdf'
+    return response
 
 @app.route("/class/")
 def upcoming():
@@ -315,7 +356,6 @@ def update_instructor(instructor_id):
             return render_template('edit_instructor.html', instructor=instructor, debug=DEBUG)
 
     return render_template('view_instructor.html', instructor=instructor, debug=DEBUG)
-
 
 # launch
 if __name__ == "__main__":
