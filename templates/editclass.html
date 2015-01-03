@@ -23,8 +23,8 @@
             <div class="panel-heading">Course info</div>
             <div class="panel-body">
               <p>Instructor: <select name="curr_instructor" class="form-control" placeholder="{{class_data['curr_instructor']}}" value="{{class_data['curr_instructor']}}" required>
-              {% for instructor_id, instructor_name in instructors %}
-                <option value="{{instructor_id}}"{% if class_data['curr_instructor']|int == instructor_id|int %} selected{% endif %}>{{instructor_name}}</option>
+              {% for instructor in instructors %}
+                <option value="{{instructor['_id']}}"{% if class_data['curr_instructor'] == instructor['_id'] %} selected{% endif %}>{{instructor['name']}}</option>
               {% endfor %}
                 </select>
               </p>

@@ -159,9 +159,17 @@ def update_class(class_id):
 
 def render_edit_class(class_data, request_data):
     #TODO: pull real data
-    instructors = [[12345, "J. Richmond"],[567789, "C. Richmond"],[145643, "J. Tobin"]]
+    client = MongoClient(MONGODB_URI)
+    db = client.get_default_database()
+    instructors_db = db['instructors']
+    instructors_list = []
+    instructors = list(instructors_db.find())
+    for next_instructor in instructors:
+        instructors_list.append({"_id":str(next_instructor['_id']),"name":next_instructor['instructor_name']})
+    client.close()
+
     course_types = [["Heartsaver CPR","Heartsaver CPR"],["Heartsaver First Aid","Heartsaver First Aid"],["Heartsaver CPR/First Aid","Heartsaver CPR/First Aid"],["Healthcare Provider","Healthcare Provider"]]
-    return render_template('editclass.html',class_data = class_data, instructors=instructors, course_types=course_types, request_data=request_data)
+    return render_template('editclass.html',class_data = class_data, instructors=instructors_list, course_types=course_types, request_data=request_data)
 
 
 @app.route("/class/")
@@ -174,7 +182,7 @@ def upcoming():
     courses.ensure_index("class_date", pymongo.DESCENDING)
     sorted_classes = list(courses.find({"class_date":{"$gte":datetime.now()}}).sort("class_date",pymongo.DESCENDING))
     for course in sorted_classes:
-        upcoming_classes.append({'course_type':course['curr_course_type'],'course_date':course['class_date'],'instructor':course['curr_instructor']})
+        upcoming_classes.append({'_id':course['_id'],'course_type':course['curr_course_type'],'course_date':course['class_date'],'instructor':course['curr_instructor']})
     client.close()
 
     return render_template('class.html', class_list=upcoming_classes, page_name="Upcoming Classes", page_id="upcoming")
@@ -189,27 +197,96 @@ def historic():
     courses.ensure_index("class_date", pymongo.DESCENDING)
     sorted_classes = list(courses.find({"class_date":{"$lt":datetime.now()}}).sort("class_date",pymongo.DESCENDING))
     for course in sorted_classes:
-        upcoming_classes.append({'course_type':course['curr_course_type'],'course_date':course['class_date'],'instructor':course['curr_instructor']})
+        upcoming_classes.append({'_id':course['_id'],'course_type':course['curr_course_type'],'course_date':course['class_date'],'instructor':course['curr_instructor']})
     client.close()
 
     return render_template('class.html', class_list=upcoming_classes, page_name="Historic Classes", page_id="historic")
 
 @app.route("/instructor/")
 def instructors():
-    #TODO: pull upcoming classes from database
-    instructors = [{"_id":12345,"name":"J. Richmond"},{"_id":567789, "name":"C. Richmond"},{"_id":145643, "name":"J. Tobin"}]
-    return render_template('instructors.html', instructors=instructors)
+    #pull instructors from database
+
+    client = MongoClient(MONGODB_URI)
+    db = client.get_default_database()
+    instructors_db = db['instructors']
+    instructors_list = []
+    instructors = list(instructors_db.find())
+    for next_instructor in instructors:
+        instructors_list.append({"_id":str(next_instructor['_id']),"name":next_instructor['instructor_name']})
+    client.close()
+
+    return render_template('instructors.html', instructors=instructors_list)
+
+@app.route("/instructor/new/")
+def new_instructor():
+
+    #default instructor - important thing here is that the _id is 0
+    instructor= {"_id":0,
+        "instructor_name":"",
+        "instructor_id":"",
+        'instructor_renewal_date':"",
+        "training_center_name":"",
+        "training_center_id":"",
+        "training_center_address":""}
+
+    return render_template('edit_instructor.html', instructor=instructor)
 
 @app.route("/instructor/<instructor_id>/", methods=['GET'])
 def view_instructor(instructor_id):
     edit = request.args.get('edit', 'false')
 
-    instructor= {"_id":12345,"instructor_name":"J. Richmond","instructor_id":"1234566433",'instructor_renewal_date':"5/1/2015","training_center_name":"Anne Arundel County FD","training_center_id":"MD123445","training_center_address":"100 Annapolis Road"}
+
+    # pull class details for selected class
+    client = MongoClient(MONGODB_URI)
+    db = client.get_default_database()
+    instructors = db['instructors']
+    instructor = instructors.find_one({"_id": ObjectId(instructor_id)})
+    client.close()
+
 
     if edit == 'true':
         return render_template('edit_instructor.html', instructor=instructor)
 
     return render_template('view_instructor.html', instructor=instructor)
+
+@app.route("/instructor/<instructor_id>/", methods=['POST'])
+def update_instructor(instructor_id):
+    edit = request.args.get('edit', 'false')
+
+    #map request data into our data object
+    instructor={}
+    try:
+        if instructor_id != '0':
+            instructor['_id']=ObjectId(class_id)
+
+        instructor['instructor_name']=request.form['instructor_name']
+        instructor['instructor_id']=request.form['instructor_id']
+        instructor['instructor_renewal_date']=request.form['instructor_renewal_date']
+        instructor['training_center_name']=request.form['training_center_name']
+        instructor['training_center_id']=request.form['training_center_id']
+        instructor['training_center_address']=request.form['training_center_address']
+
+    except KeyError:
+        error = True
+
+    #persist to datastore
+    client = MongoClient(MONGODB_URI)
+    db = client.get_default_database()
+    instructors = db['instructors']
+    #if new class, create new record
+    real_instructor_id = instructors.save(instructor)
+    instructor['_id'] = real_instructor_id
+
+    client.close()
+
+    if edit == 'true':
+        if instructor_id == '0':
+            return redirect('/instructor/'+str(real_instructor_id)+'/', code=303)
+        else:
+            return render_template('edit_instructor.html', instructor=instructor)
+
+    return render_template('view_instructor.html', instructor=instructor)
+
 
 # launch
 if __name__ == "__main__":

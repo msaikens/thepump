@@ -7,17 +7,17 @@
 
 <form action="/instructor/{{instructor['_id']}}/?edit=true" method="post">
 
-<p> Instructor Name: {{instructor['instructor_name']}}</p>
-<p> Instructor ID: {{instructor['instructor_id']}}</p>
-<p> Instructor Renewal Date: {{instructor['instructor_renewal_date']}}</p>
-<p> Training Center Name: {{instructor['training_center_name']}}</p>
-<p> Training Center ID: {{instructor['training_center_id']}}</p>
-<p> Training Center Address: {{instructor['training_center_address']}}</p>
+<p> Instructor Name: <input type="text" class="form-control" name="instructor_name" placeholder="Instructor Name" value="{{instructor['instructor_name']}}" required></p>
+<p> Instructor ID: <input type="text" class="form-control" name="instructor_id" placeholder="Instructor ID" value="{{instructor['instructor_id']}}"></p>
+<p> Instructor Renewal Date: <input type="text" class="form-control" name="instructor_renewal_date" placeholder="Instructor Renewal Date" value="{{instructor['instructor_renewal_date']}}"></p>
+<p> Training Center Name: <input type="text" class="form-control" name="training_center_name" placeholder="TC Name" value="{{instructor['training_center_name']}}"></p>
+<p> Training Center ID: <input type="text" class="form-control" name="training_center_id" placeholder="TC ID" value="{{instructor['training_center_id']}}"></p>
+<p> Training Center Address: <input type="text" class="form-control" name="training_center_address" placeholder="TC Address" value="{{instructor['training_center_address']}}"></p>
 
 
 <div class="btn-toolbar" role="group">
     <button id='submit' type="submit" class="btn btn-success">Save</button>
-    <a href="/class/{{instructor['_id']}}/" class="btn btn-danger">Cancel</a>
+    <a href="/instructor/{{instructor['_id']}}/" class="btn btn-danger">Cancel</a>
 </div>
 
 
