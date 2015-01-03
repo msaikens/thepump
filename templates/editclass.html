@@ -10,8 +10,8 @@
           <!-- Table -->
           <table class="table">
             <tr><th>Name</th><th>Street Address</th><th>City, State</th></tr>
-            {% for student_id, student_data in class_data['students']|dictsort %}
-            <tr><td><input type="text" class="form-control" name="{{student_id}}-name" placeholder="Name" value="{{student_data['name']}}" required></td><td><input type="text" class="form-control" name="{{student_id}}-street_address" placeholder="Street Address" value="{{student_data['street_address']}}" required></td><td><input type="text" class="form-control" name="{{student_id}}-city_state" placeholder="City, State" value="{{student_data['city_state']}}" required></td></tr>
+            {% for student in class_data['students'] %}
+            <tr><td><input type="text" class="form-control" name="student_{{loop.index0}}-name" placeholder="Name" value="{{student['name']}}" required></td><td><input type="text" class="form-control" name="student_{{loop.index0}}-street_address" placeholder="Street Address" value="{{student['street_address']}}" required></td><td><input type="text" class="form-control" name="student_{{loop.index0}}-city_state" placeholder="City, State" value="{{student['city_state']}}" required></td></tr>
             {% endfor %}
             <tr><td><input type="text" class="form-control" name="new_student-name" placeholder="Name"></td><td><input type="text" class="form-control" name="new_student-street_address" placeholder="Street Address"></td><td><input type="text" class="form-control" name="new_student-city_state" placeholder="City, State"></td></tr>
           </table>
@@ -28,13 +28,13 @@
               {% endfor %}
                 </select>
               </p>
-              <p><select name="course_type" class="form-control" placeholder="" value="{{class_data['curr_course_type']}}" required>
-              {% for course_type_id, course_type_name in course_types %}
-                <option value="{{course_type_id}}"{% if class_data['curr_course_type'] == course_type_id %} selected{% endif %} >{{course_type_name}}</option>
+              <p><select name="course_type" class="form-control" placeholder="" value="{{class_data['curr_course_type_id']}}" required>
+              {% for course_type_id, course_type_name in course_types.iteritems() %}
+                <option value="{{course_type_id}}"{% if class_data['curr_course_type_id'] == course_type_id %} selected{% endif %} >{{course_type_name}}</option>
               {% endfor %}
                 </select>
               </p>
-              <p>Course Date: <input type="date" class="form-control" name="class_date" placeholder="Course Date" value="{{class_data['class_date'].strftime('%m/%d/%Y')}}"></p>
+              <p>Course Date: <input type="date" class="form-control" name="class_date" placeholder="Course Date" value="{{class_data['class_date'].strftime('%Y-%m-%d')}}" required></p>
               {% for option, value in class_data['options']|dictsort %}
               <div class="checkbox">
                   {% if value=="true"%}

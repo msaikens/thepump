@@ -9,6 +9,8 @@ import pymongo
 
 MONGODB_URI = os.environ['MONGOLAB_URI']
 
+COURSE_TYPES = {1:"Heartsaver CPR",2:"Heartsaver First Aid",3:"Heartsaver CPR/First Aid",4:"Healthcare Provider"}
+
 # initialization
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -83,11 +85,15 @@ def update_class(class_id):
         try:
             class_data['class_date'] = datetime.strptime(request.form['class_date'], '%m/%d/%Y')
         except ValueError:
-            error = True
+            #handle Chrome (HTML5 date form field) date formatting
+            class_data['class_date'] = datetime.strptime(request.form['class_date'], '%Y-%m-%d')
+            #error = True
 
         if class_id != '0':
             class_data['_id']=ObjectId(class_id)
-        class_data['curr_course_type']=request.form['course_type']
+
+        class_data['curr_course_type_id']=request.form['course_type']
+        class_data['curr_course_type']=COURSE_TYPES[int(class_data['curr_course_type_id'])]
 
         #pull options. #TODO: pull available options from lookup table
         class_data['options'] = {}
@@ -111,7 +117,7 @@ def update_class(class_id):
         #todo: something here
         error = True
 
-    class_data['students'] ={}
+    class_data['students'] = []
     num_students = int(request.form['num_students'])
     for x in range(num_students):
         next_student_key = 'student_'+str(x)
@@ -119,10 +125,13 @@ def update_class(class_id):
         next_student_address_key = next_student_key+'-street_address'
         next_student_city_key = next_student_key+'-city_state'
         try:
-            class_data['students'][next_student_key] = {}
-            class_data['students'][next_student_key]['name'] = request.form[next_student_name_key]
-            class_data['students'][next_student_key]['street_address'] = request.form[next_student_address_key]
-            class_data['students'][next_student_key]['city_state'] = request.form[next_student_city_key]
+            student = {}
+            student['name'] = request.form[next_student_name_key]
+            student['street_address'] = request.form[next_student_address_key]
+            student['city_state'] = request.form[next_student_city_key]
+
+            class_data['students'].append(student)
+
         except KeyError:
             error = True
 
@@ -130,11 +139,13 @@ def update_class(class_id):
     try:
         new_student_name = request.form['new_student-name']
         if new_student_name != '':
-            new_student_key = 'student_'+str(len(class_data['students']))
-            class_data['students'][new_student_key] = {}
-            class_data['students'][new_student_key]['name'] = request.form['new_student-name']
-            class_data['students'][new_student_key]['street_address'] = request.form['new_student-street_address']
-            class_data['students'][new_student_key]['city_state'] = request.form['new_student-city_state']
+            student = {}
+            student['name'] = request.form['new_student-name']
+            student['street_address'] = request.form['new_student-street_address']
+            student['city_state'] = request.form['new_student-city_state']
+
+            class_data['students'].append(student)
+
 
     except KeyError:
         error = True
@@ -174,8 +185,7 @@ def render_edit_class(class_data, request_data):
         instructors_list.append({"_id":str(next_instructor['_id']),"name":next_instructor['instructor_name']})
     client.close()
 
-    course_types = [["Heartsaver CPR","Heartsaver CPR"],["Heartsaver First Aid","Heartsaver First Aid"],["Heartsaver CPR/First Aid","Heartsaver CPR/First Aid"],["Healthcare Provider","Healthcare Provider"]]
-    return render_template('editclass.html',class_data = class_data, instructors=instructors_list, course_types=course_types, request_data=request_data)
+    return render_template('editclass.html',class_data = class_data, instructors=instructors_list, course_types=COURSE_TYPES, request_data=request_data)
 
 
 @app.route("/class/")
@@ -263,7 +273,7 @@ def update_instructor(instructor_id):
     instructor={}
     try:
         if instructor_id != '0':
-            instructor['_id']=ObjectId(class_id)
+            instructor['_id']=ObjectId(instructor_id)
 
         instructor['instructor_name']=request.form['instructor_name']
         instructor['instructor_id']=request.form['instructor_id']

@@ -37,7 +37,7 @@
           <!-- Table -->
           <table class="table">
             <tr><th>Name</th><th>Street Address</th><th>City, State</th></tr>
-            {% for student_id, student_data in class_data['students']|dictsort %}
+            {% for student_data in class_data['students'] %}
             <tr><td>{{student_data['name']}}</td><td>{{student_data['street_address']}}</td><td>{{student_data['city_state']}}</td></tr>
             {% endfor %}
           </table>
@@ -51,9 +51,9 @@
               <p>Instructor {{class_data['curr_instructor']['instructor_name']}}</p>
               <p>{{class_data['curr_course_type']}}</p>
               <p>Course Date: {{class_data['class_date'].strftime('%m/%d/%Y')}}</p>
-              <p>Infant: {% if class_data['options']['Infant'] == 'true' %}X{% endif %} </p>
-              <p>Child: {% if class_data['options']['Child'] == 'true' %}X{% endif %} </p>
-              <p>Written test: {% if class_data['options']['Written'] == 'true' %}X{% endif %}</p>
+              {% for option, value in class_data['options']|dictsort %}
+              <p> {{option}}: {% if value == 'true' %}X{% endif %}
+              {% endfor %}
             </div>
         </div>
     </div>
