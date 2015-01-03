@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% set active_page = "instructors" %}
-{% block title %} - Home{% endblock %}
+{% block title %} - Instructors{% endblock %}
 {% block content %}
 
-<p>Instructors</p>
+<h2>Instructors</h2>
 
 <table class="table">
-    <tr><th>Instructor</th></tr>
+    <tr><th>Instructor</th><th>Actions</th></tr>
     {% for instructor in instructors %}
     <tr><td>{{instructor['name']}}</td>
     <td><a href="/instructor/{{instructor['_id']}}/" class="btn btn-default"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> View</a></td>
