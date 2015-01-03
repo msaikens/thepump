@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% set active_page = "instructors" %}
+{% block title %} - Home{% endblock %}
+{% block content %}
+
+<p>Instructor information</p>
+
+<form action="/instructor/{{instructor['_id']}}/?edit=true" method="post">
+
+<p> Instructor Name: {{instructor['instructor_name']}}</p>
+<p> Instructor ID: {{instructor['instructor_id']}}</p>
+<p> Instructor Renewal Date: {{instructor['instructor_renewal_date']}}</p>
+<p> Training Center Name: {{instructor['training_center_name']}}</p>
+<p> Training Center ID: {{instructor['training_center_id']}}</p>
+<p> Training Center Address: {{instructor['training_center_address']}}</p>
+
+
+<div class="btn-toolbar" role="group">
+    <button id='submit' type="submit" class="btn btn-success">Save</button>
+    <a href="/class/{{instructor['_id']}}/" class="btn btn-danger">Cancel</a>
+</div>
+
+
+
+{% endblock %}

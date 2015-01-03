@@ -62,7 +62,7 @@ def show_class(class_id):
 
 @app.route("/class/<class_id>/", methods=['POST'])
 def update_class(class_id):
-    #TODO: update class details, then show class
+    #update class details, then show class
 
     edit = request.args.get('edit', 'false')
 
@@ -194,12 +194,22 @@ def historic():
 
     return render_template('class.html', class_list=upcoming_classes, page_name="Historic Classes", page_id="historic")
 
-@app.route("/instructors/")
+@app.route("/instructor/")
 def instructors():
     #TODO: pull upcoming classes from database
-
     instructors = [{"_id":12345,"name":"J. Richmond"},{"_id":567789, "name":"C. Richmond"},{"_id":145643, "name":"J. Tobin"}]
     return render_template('instructors.html', instructors=instructors)
+
+@app.route("/instructor/<instructor_id>/", methods=['GET'])
+def view_instructor(instructor_id):
+    edit = request.args.get('edit', 'false')
+
+    instructor= {"_id":12345,"instructor_name":"J. Richmond","instructor_id":"1234566433",'instructor_renewal_date':"5/1/2015","training_center_name":"Anne Arundel County FD","training_center_id":"MD123445","training_center_address":"100 Annapolis Road"}
+
+    if edit == 'true':
+        return render_template('edit_instructor.html', instructor=instructor)
+
+    return render_template('view_instructor.html', instructor=instructor)
 
 # launch
 if __name__ == "__main__":

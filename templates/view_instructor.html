@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% set active_page = "instructors" %}
+{% block title %} - Home{% endblock %}
+{% block content %}
+
+<p>Instructor information</p>
+
+<p> Instructor Name: {{instructor['instructor_name']}}</p>
+<p> Instructor ID: {{instructor['instructor_id']}}</p>
+<p> Instructor Renewal Date: {{instructor['instructor_renewal_date']}}</p>
+<p> Training Center Name: {{instructor['training_center_name']}}</p>
+<p> Training Center ID: {{instructor['training_center_id']}}</p>
+<p> Training Center Address: {{instructor['training_center_address']}}</p>
+
+
+<div>
+    <a href="/instructor/{{instructor['_id']}}/?edit=true" class="btn btn-default"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit</a>
+</div>
+
+{% endblock %}
