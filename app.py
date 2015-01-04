@@ -61,7 +61,7 @@ def show_class(class_id):
 
     #redirect if someone cancels creating a new class
     if class_id == '0':
-        return redirect('/class/', code=301)
+        return redirect('/class/', code=303)
 
     # pull class details for selected class
     client = MongoClient(MONGODB_URI)
