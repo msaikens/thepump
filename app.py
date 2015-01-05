@@ -1,6 +1,6 @@
 import os
 from flask import Flask, request, render_template, send_from_directory, redirect, make_response
-from flask.ext.stormpath import StormpathManager, login_required
+from flask.ext.stormpath import StormpathManager, login_required, groups_required
 import json
 from pymongo import MongoClient
 from bson.objectid import ObjectId
@@ -48,6 +48,7 @@ def index():
 
 @app.route("/class/new/")
 @login_required
+@groups_required(['course_managers'])
 def new_class():
     # create blank class
     class_data={}
@@ -65,6 +66,7 @@ def new_class():
 
 @app.route("/class/<class_id>/", methods=['GET'])
 @login_required
+@groups_required(['course_managers'])
 def show_class(class_id):
 
     #redirect if someone cancels creating a new class
@@ -87,6 +89,7 @@ def show_class(class_id):
 
 @app.route("/class/<class_id>/", methods=['POST'])
 @login_required
+@groups_required(['course_managers'])
 def update_class(class_id):
     #update class details, then show class
 
@@ -216,6 +219,7 @@ def render_edit_class(class_data, request_data):
 
 @app.route("/class/<class_id>/skillsheets/")
 @login_required
+@groups_required(['course_managers'])
 def gen_class_skillsheets(class_id):
     # pull class details for selected class
     client = MongoClient(MONGODB_URI)
@@ -254,6 +258,7 @@ def gen_class_skillsheets(class_id):
 
 @app.route("/class/<class_id>/roster/")
 @login_required
+@groups_required(['course_managers'])
 def gen_class_roster(class_id):
     # pull class details for selected class
     client = MongoClient(MONGODB_URI)
@@ -282,6 +287,7 @@ def gen_class_roster(class_id):
 
 @app.route("/class/<class_id>/cards/")
 @login_required
+@groups_required(['course_managers'])
 def gen_class_cards(class_id):
     # pull class details for selected class
     client = MongoClient(MONGODB_URI)
@@ -351,6 +357,7 @@ def gen_class_cards(class_id):
 
 @app.route("/class/")
 @login_required
+@groups_required(['course_managers'])
 def upcoming():
     #pull upcoming classes from database
     client = MongoClient(MONGODB_URI)
@@ -367,6 +374,7 @@ def upcoming():
 
 @app.route("/historic/")
 @login_required
+@groups_required(['course_managers'])
 def historic():
     #pull upcoming classes from database
     client = MongoClient(MONGODB_URI)
@@ -383,6 +391,7 @@ def historic():
 
 @app.route("/instructor/")
 @login_required
+@groups_required(['course_managers'])
 def instructors():
     #pull instructors from database
 
@@ -399,6 +408,7 @@ def instructors():
 
 @app.route("/instructor/new/")
 @login_required
+@groups_required(['course_managers'])
 def new_instructor():
 
     #default instructor - important thing here is that the _id is 0
@@ -414,6 +424,7 @@ def new_instructor():
 
 @app.route("/instructor/<instructor_id>/", methods=['GET'])
 @login_required
+@groups_required(['course_managers'])
 def view_instructor(instructor_id):
     edit = request.args.get('edit', 'false')
     #redirect if someone cancels creating a new instructor
@@ -435,6 +446,7 @@ def view_instructor(instructor_id):
 
 @app.route("/instructor/<instructor_id>/", methods=['POST'])
 @login_required
+@groups_required(['course_managers'])
 def update_instructor(instructor_id):
     edit = request.args.get('edit', 'false')
 
