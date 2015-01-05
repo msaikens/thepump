@@ -1,5 +1,6 @@
 import os
 from flask import Flask, request, render_template, send_from_directory, redirect, make_response
+from flask.ext.stormpath import StormpathManager, login_required
 import json
 from pymongo import MongoClient
 from bson.objectid import ObjectId
@@ -12,17 +13,22 @@ import StringIO
 from PyPDF2 import PdfFileMerger, PdfFileReader
 import itertools
 
+DEBUG = os.environ.get('DEBUG', False)
 
-
-MONGODB_URI = os.environ['MONGOLAB_URI']
+MONGODB_URI = os.environ.get('MONGOLAB_URI')
+SECRET_KEY = os.environ.get('SECRET_KEY')
+STORMPATH_API_KEY_ID = os.environ.get('STORMPATH_API_KEY_ID')
+STORMPATH_API_KEY_SECRET = os.environ.get('STORMPATH_API_KEY_SECRET')
+STORMPATH_APPLICATION = os.environ.get('STORMPATH_APP')
 
 COURSE_TYPES = {1:"Heartsaver CPR",2:"Heartsaver First Aid",3:"Heartsaver CPR/First Aid",4:"Healthcare Provider"}
-
-DEBUG = os.environ.get('DEBUG', False)
 
 # initialization
 app = Flask(__name__)
 app.config.from_object(__name__)
+
+stormpath_manager = StormpathManager(app)
+
 
 if DEBUG:
     app.debug = True
@@ -41,6 +47,7 @@ def index():
     return render_template('index.html', debug=DEBUG)
 
 @app.route("/class/new/")
+@login_required
 def new_class():
     # create blank class
     class_data={}
@@ -57,6 +64,7 @@ def new_class():
     return render_edit_class(class_data, '')
 
 @app.route("/class/<class_id>/", methods=['GET'])
+@login_required
 def show_class(class_id):
 
     #redirect if someone cancels creating a new class
@@ -78,6 +86,7 @@ def show_class(class_id):
     return render_template('showclass.html', class_data = class_data, debug=DEBUG)
 
 @app.route("/class/<class_id>/", methods=['POST'])
+@login_required
 def update_class(class_id):
     #update class details, then show class
 
@@ -206,6 +215,7 @@ def render_edit_class(class_data, request_data):
     return render_template('editclass.html',class_data = class_data, instructors=instructors_list, course_types=COURSE_TYPES, request_data=request_data, debug=DEBUG)
 
 @app.route("/class/<class_id>/skillsheets/")
+@login_required
 def gen_class_skillsheets(class_id):
     # pull class details for selected class
     client = MongoClient(MONGODB_URI)
@@ -243,6 +253,7 @@ def gen_class_skillsheets(class_id):
     return response
 
 @app.route("/class/<class_id>/roster/")
+@login_required
 def gen_class_roster(class_id):
     # pull class details for selected class
     client = MongoClient(MONGODB_URI)
@@ -270,6 +281,7 @@ def gen_class_roster(class_id):
     return response
 
 @app.route("/class/<class_id>/cards/")
+@login_required
 def gen_class_cards(class_id):
     # pull class details for selected class
     client = MongoClient(MONGODB_URI)
@@ -338,6 +350,7 @@ def gen_class_cards(class_id):
 
 
 @app.route("/class/")
+@login_required
 def upcoming():
     #pull upcoming classes from database
     client = MongoClient(MONGODB_URI)
@@ -353,6 +366,7 @@ def upcoming():
     return render_template('class.html', class_list=upcoming_classes, page_name="Upcoming Classes", page_id="upcoming", debug=DEBUG)
 
 @app.route("/historic/")
+@login_required
 def historic():
     #pull upcoming classes from database
     client = MongoClient(MONGODB_URI)
@@ -368,6 +382,7 @@ def historic():
     return render_template('class.html', class_list=upcoming_classes, page_name="Historic Classes", page_id="historic", debug=DEBUG)
 
 @app.route("/instructor/")
+@login_required
 def instructors():
     #pull instructors from database
 
@@ -383,6 +398,7 @@ def instructors():
     return render_template('instructors.html', instructors=instructors_list, debug=DEBUG)
 
 @app.route("/instructor/new/")
+@login_required
 def new_instructor():
 
     #default instructor - important thing here is that the _id is 0
@@ -397,6 +413,7 @@ def new_instructor():
     return render_template('edit_instructor.html', instructor=instructor, debug=DEBUG)
 
 @app.route("/instructor/<instructor_id>/", methods=['GET'])
+@login_required
 def view_instructor(instructor_id):
     edit = request.args.get('edit', 'false')
     #redirect if someone cancels creating a new instructor
@@ -417,6 +434,7 @@ def view_instructor(instructor_id):
     return render_template('view_instructor.html', instructor=instructor, debug=DEBUG)
 
 @app.route("/instructor/<instructor_id>/", methods=['POST'])
+@login_required
 def update_instructor(instructor_id):
     edit = request.args.get('edit', 'false')
 
