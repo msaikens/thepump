@@ -179,10 +179,10 @@ def update_class(class_id):
     client.close()
 
     if edit == 'true':
-        if os.environ['DEBUG'] == 'true':
+        if DEBUG:
             request_data = request.form
         else:
-            request_data = ''
+            request_data = ' '
 
         if class_id == '0':
             return redirect('/class/'+str(course_id)+'/', code=303)
