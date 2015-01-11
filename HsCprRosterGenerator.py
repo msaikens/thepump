@@ -150,3 +150,30 @@ def generate_pdf(class_data):
 
 
     return merged_roster
+
+def main():
+    class_data = {'student_manikin_ratio':"2:1",
+    'students': [{'name':'john doe', 'street_address':'12345 some street', 'city_state':'some city'}],
+    'curr_instructor': {'training_center_id':'123455',
+                        'training_center_address':'maryland',
+                        'instructor_id':'1234',
+                        'training_center_name':'some TC',
+                        'instructor_renewal_date':'5/11/2014',
+                        'instructor_name':'Someone',
+                        },
+    'curr_course_type_id':1,
+    'curr_course_type':"Heartsaver CPR",
+    'class_date': '5/1/2014',
+    'class_location':"Crofton,MD",
+    'options': {'Infants':True, 'Written':True, 'Child':True}}
+
+    pdf = generate_pdf(class_data)
+    #write combined pdf to file
+    dir = os.path.realpath('.')
+    filename = os.path.join(dir, 'test','test_HS_roster.pdf')
+    outputStream = file(filename, "wb")
+    pdf.write(outputStream)
+    outputStream.close()
+
+if __name__ == "__main__":
+    main()
