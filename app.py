@@ -21,7 +21,17 @@ STORMPATH_API_KEY_ID = os.environ.get('STORMPATH_API_KEY_ID')
 STORMPATH_API_KEY_SECRET = os.environ.get('STORMPATH_API_KEY_SECRET')
 STORMPATH_APPLICATION = os.environ.get('STORMPATH_APP')
 
-COURSE_TYPES = {1:"Heartsaver CPR",2:"Heartsaver First Aid",3:"Heartsaver CPR/First Aid",4:"Healthcare Provider"}
+COURSE_TYPES = {
+    1:"Heartsaver CPR",
+    2:"Heartsaver First Aid",
+    3:"Heartsaver CPR/First Aid",
+    4:"Healthcare Provider"}
+
+COURSE_OPTIONS = {
+    1:['Infants', 'Written', 'Child'],
+    2:['Written'],
+    3:['Infants', 'Written', 'Child'],
+    4:['New', 'Renewal', 'Instructor','Provider']}
 
 # initialization
 app = Flask(__name__)
@@ -212,10 +222,14 @@ def render_edit_class(class_data, request_data):
     instructors_list = []
     instructors = list(instructors_db.find())
     for next_instructor in instructors:
-        instructors_list.append({"_id":str(next_instructor['_id']),"name":next_instructor['instructor_name']})
+        instructors_list.append({
+            "_id":str(next_instructor['_id']),
+            "name":next_instructor['instructor_name']})
     client.close()
 
-    return render_template('editclass.html',class_data = class_data, instructors=instructors_list, course_types=COURSE_TYPES, request_data=request_data, debug=DEBUG)
+    return render_template('editclass.html',
+        class_data = class_data, instructors=instructors_list,
+        course_types=COURSE_TYPES, request_data=request_data, debug=DEBUG)
 
 @app.route("/class/<class_id>/skillsheets/")
 @login_required
@@ -234,8 +248,11 @@ def gen_class_skillsheets(class_id):
     for row in class_data['students']:
         if(row["name"] != ''):
             next_skillsheet = HsCprSkillsGenerator.generate_pdf(row["name"],
-                class_data["class_date"].strftime("%m/%d/%y"), class_data['curr_instructor']['instructor_name'],
-                adult=True, child=class_data['options']['Child'], infant=class_data['options']['Infants'])
+                class_data["class_date"].strftime("%m/%d/%y"),
+                class_data['curr_instructor']['instructor_name'],
+                adult=True,
+                child=class_data['options']['Child'],
+                infant=class_data['options']['Infants'])
             ss_packet = StringIO.StringIO()
             next_skillsheet.write(ss_packet)
             skillsheets.append(ss_packet)
@@ -367,10 +384,18 @@ def upcoming():
     courses.ensure_index("class_date", pymongo.DESCENDING)
     sorted_classes = list(courses.find({"class_date":{"$gte":datetime.now()}}).sort("class_date",pymongo.DESCENDING))
     for course in sorted_classes:
-        upcoming_classes.append({'_id':course['_id'],'course_type':course['curr_course_type'],'course_date':course['class_date'],'instructor':course['curr_instructor']['instructor_name']})
+        upcoming_classes.append({
+            '_id':course['_id'],
+            'course_type':course['curr_course_type'],
+            'course_date':course['class_date'],
+            'instructor':course['curr_instructor']['instructor_name']})
     client.close()
 
-    return render_template('class.html', class_list=upcoming_classes, page_name="Upcoming Classes", page_id="upcoming", debug=DEBUG)
+    return render_template('class.html',
+        class_list=upcoming_classes,
+        page_name="Upcoming Classes",
+        page_id="upcoming",
+        debug=DEBUG)
 
 @app.route("/historic/")
 @login_required
@@ -384,10 +409,18 @@ def historic():
     courses.ensure_index("class_date", pymongo.DESCENDING)
     sorted_classes = list(courses.find({"class_date":{"$lt":datetime.now()}}).sort("class_date",pymongo.DESCENDING))
     for course in sorted_classes:
-        upcoming_classes.append({'_id':course['_id'],'course_type':course['curr_course_type'],'course_date':course['class_date'],'instructor':course['curr_instructor']['instructor_name']})
+        upcoming_classes.append({
+            '_id':course['_id'],
+            'course_type':course['curr_course_type'],
+            'course_date':course['class_date'],
+            'instructor':course['curr_instructor']['instructor_name']})
     client.close()
 
-    return render_template('class.html', class_list=upcoming_classes, page_name="Historic Classes", page_id="historic", debug=DEBUG)
+    return render_template('class.html',
+        class_list=upcoming_classes,
+        page_name="Historic Classes",
+        page_id="historic",
+        debug=DEBUG)
 
 @app.route("/instructor/")
 @login_required
@@ -401,10 +434,14 @@ def instructors():
     instructors_list = []
     instructors = list(instructors_db.find())
     for next_instructor in instructors:
-        instructors_list.append({"_id":str(next_instructor['_id']),"name":next_instructor['instructor_name']})
+        instructors_list.append({
+            "_id":str(next_instructor['_id']),
+            "name":next_instructor['instructor_name']})
     client.close()
 
-    return render_template('instructors.html', instructors=instructors_list, debug=DEBUG)
+    return render_template('instructors.html',
+        instructors=instructors_list,
+        debug=DEBUG)
 
 @app.route("/instructor/new/")
 @login_required
