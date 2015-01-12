@@ -22,27 +22,32 @@ def generate_course_info_page_pdf(class_data, num_students):
     can = canvas.Canvas(packet, pagesize=(792, 612))
     can.setFont("Helvetica", 10)
 
-    can.drawString(58, 428, u"✗")
-    if (class_data['options']['Child']):
-        can.drawString(76, 415, u"✗")
-    if (class_data['options']['Infants']):
-        can.drawString(171, 415, u"✗")
-    if (class_data['options']['Written']):
-        can.drawString(243, 415, u"✗")
+    if (class_data['options']['New']):
+        can.drawString(58, 428, u"✗")
+
+    if (class_data['options']['Renewal']):
+        can.drawString(58, 416, u"✗")
+
+    if (class_data['options']['Instructor']):
+        can.drawString(58, 404, u"✗")
+
+    if (class_data['options']['Provider']):
+        can.drawString(58, 392, u"✗")
 
     can.drawString(495, 426, class_data['curr_instructor']['instructor_name'])
-    can.drawString(519, 403, u"✗")
-    can.drawString(512, 389, class_data['curr_instructor']['instructor_renewal_date'])
-    can.drawString(493, 378, class_data['curr_instructor']['training_center_name'])
-    can.drawString(510, 366, class_data['curr_instructor']['training_center_id'])
-    can.drawString(493, 341, class_data['class_location'])
+    can.drawString(519, 403, class_data['curr_instructor']['instructor_renewal_date'])
+    can.drawString(493, 389, class_data['curr_instructor']['training_center_id'])
+    can.drawString(512, 378, class_data['curr_instructor']['training_center_name'])
+    can.drawString(510, 366, '') #training site name
+    can.drawString(493, 354, class_data['class_location'])
+    can.drawString(493, 341, '') #address
 
-    can.drawString(165, 268, class_data['class_date'].strftime("%m/%d/%y"))
-    can.drawString(378, 268, class_data['class_date'].strftime("%m/%d/%y"))
-    can.drawString(614, 268, "4")
-    can.drawString(153, 244, str(num_students))
-    can.drawString(381, 244, class_data['student_manikin_ratio'])
-    can.drawString(581, 244, class_data['card_issue_date'].strftime("%m/%y"))
+    can.drawString(165, 283, class_data['class_date'].strftime("%m/%d/%y"))
+    can.drawString(378, 283, class_data['class_date'].strftime("%m/%d/%y"))
+    can.drawString(614, 283, "4")
+    can.drawString(153, 259, str(num_students))
+    can.drawString(381, 259, class_data['student_manikin_ratio'])
+    can.drawString(581, 259, class_data['card_issue_date'].strftime("%m/%y"))
 
     can.save()
 
@@ -168,12 +173,12 @@ def main():
     'class_date': datetime.today(),
     'card_issue_date':datetime.today(),
     'class_location':"Crofton,MD",
-    'options': {'Infants':True, 'Written':True, 'Child':True}}
+    'options': {'New':True, 'Renewal':True, 'Instructor':True,'Provider':True}}
 
     pdf = generate_pdf(class_data)
     #write combined pdf to file
     dir = os.path.realpath('.')
-    filename = os.path.join(dir, 'test','test_HS_roster.pdf')
+    filename = os.path.join(dir, 'test','test_HCP_roster.pdf')
     outputStream = file(filename, "wb")
     pdf.write(outputStream)
     outputStream.close()
