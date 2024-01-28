@@ -1,7 +1,10 @@
 thepump
 =======
 
-central resource for AHA CPR class management
+A central resource for AHA CPR class management. This software will meet the needs of instructors looking to handle 
+enrollments, registrations, rosters, and other necessary paperowrk requirements.
+
+Integration with other certification organizations may be integrated in the future.
 
 
 environment variables:
